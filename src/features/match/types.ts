@@ -76,6 +76,10 @@ export interface RecordDetail {
 }
 
 export interface SearchResult {
+  reviewId?: string
+  cacheHit?: boolean
+  reviewState?: string
+  snapshotId?: string
   rows: MatchRow[]
   totalCount: number
   query: string
@@ -107,6 +111,7 @@ export interface EvidenceOverview extends AnswerMetadata {
 }
 
 export interface IndexInfo {
+  progressiveSearch?: boolean
   records: number
   sites: { site: string; count: number }[]
   modelName: string

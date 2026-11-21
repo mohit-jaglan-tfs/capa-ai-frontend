@@ -1,3 +1,4 @@
+import {ProgressiveReviewError} from "../services/progressive"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { matchService } from "../services/matchService"
 import type { DetailState, IndexInfo, IndexState, MatchRow, RecordDetail, SearchInput, SearchResult, SearchState } from "../types"
@@ -12,6 +13,8 @@ export function useMatchSearch() {
   const [result, setResult] = useState<SearchResult | null>(null)
   const [submitted, setSubmitted] = useState<SearchInput | null>(null)
   const [selectedId, setSelectedId] = useState("")
+  const [selectedRow,setSelectedRow]=useState<MatchRow|null>(null)
+  const [reviewError,setReviewError]=useState("")
   const [detailState, setDetailState] = useState<DetailState>("idle")
   const [detailError, setDetailError] = useState("")
   const [recordDetail, setRecordDetail] = useState<RecordDetail | null>(null)
@@ -19,7 +22,7 @@ export function useMatchSearch() {
   const [indexInfo, setIndexInfo] = useState<IndexInfo | null>(null)
   const searchRequest = useRef<AbortController | null>(null)
   const detailRequest = useRef<AbortController | null>(null)
-  const selected = useMemo(() => result?.rows.find(row => row.deviationId === selectedId), [result, selectedId])
+  const selected = useMemo(() => result?.rows.find(row => row.deviationId === selectedId) ?? (selectedRow?.deviationId===selectedId?selectedRow:undefined), [result, selectedId, selectedRow])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -70,24 +73,32 @@ export function useMatchSearch() {
     setSearchState("loading")
     setSearchError("")
     setResult(null)
-    setSelectedId("")
+    setSelectedId("");setSelectedRow(null);setReviewError("")
     setDetailState("idle")
     setDetailError("")
     setRecordDetail(null)
     setSubmitted(request)
     try {
-      const result = await matchService.search(request, controller.signal)
+      const result = await matchService.search(request, controller.signal, indexInfo?.progressiveSearch ? initial=>{
+        if(controller.signal.aborted)return
+        setResult(initial);setSearchState(initial.rows.length?"success":"empty")
+      }:undefined)
       if (controller.signal.aborted) return
       setResult(result)
       setSearchState(result.rows.length ? "success" : "empty")
     } catch (error) {
       if (controller.signal.aborted) return
+      if(error instanceof ProgressiveReviewError){
+        setResult({...error.initial,reviewState:"unavailable",summaryId:null});setReviewError(error.message)
+        setSearchState(error.initial.rows.length?"success":"empty");return
+      }
+      setResult(null);setSelectedId("");setSelectedRow(null);detailRequest.current?.abort();setRecordDetail(null);setDetailState("idle")
       setSearchError(messageOf(error, "The search request could not be completed."))
       setSearchState("error")
     }
-  }, [])
-  const select = useCallback((row: MatchRow) => { setSelectedId(row.deviationId); return loadRecord(row) }, [loadRecord])
+  }, [indexInfo?.progressiveSearch])
+  const select = useCallback((row: MatchRow) => { setSelectedId(row.deviationId);setSelectedRow(row); return loadRecord(row) }, [loadRecord])
   const retryDetail = useCallback(() => { if (selected) void loadRecord(selected) }, [selected, loadRecord])
   const cancel = useCallback(() => { searchRequest.current?.abort(); setSearchState("idle"); setSearchError("") }, [])
-  return { searchState, searchError, result, submitted, selected, selectedId, detailState, detailError, recordDetail, indexState, indexInfo, search, select, retryDetail, cancel }
+  return { searchState, searchError, reviewError, result, submitted, selected, selectedId, detailState, detailError, recordDetail, indexState, indexInfo, search, select, retryDetail, cancel }
 }

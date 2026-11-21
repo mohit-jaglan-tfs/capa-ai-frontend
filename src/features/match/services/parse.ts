@@ -1,3 +1,4 @@
+import {applyReviewMetadata} from "./progressive"
 import { parseScopeFilters, parseStatusCounts } from "../scopeModel"
 import { parseAnswerMetadata } from "../summaryEvidence"
 import type { CapaRow, EvidenceOverview, FilterOptions, IndexInfo, MatchFilters, MatchKind, MatchRow, RecordDetail, SearchResult } from "../types"
@@ -79,7 +80,7 @@ export function parseSearchResponse(value: unknown): SearchResult {
   if (typeof value.all_sites !== "boolean") throw new Error(UNEXPECTED)
   if (!value.all_sites && rows.some(row => row.site !== value.site)) throw new Error(UNEXPECTED)
   const result: SearchResult = {
-    rows,
+    rows, snapshotId,
     totalCount: rows.length,
     query: typeof value.query === "string" ? value.query : requiredText(value.query),
     scope: value.all_sites ? "All allowed sites" : requiredText(value.site),
@@ -119,6 +120,7 @@ export function parseSearchResponse(value: unknown): SearchResult {
     result.totalMatches !== null && (rows.length > result.totalMatches || result.eligibleCount !== null && result.totalMatches > result.eligibleCount) ||
     result.hasMore && (result.totalMatches === null || result.offset + rows.length >= result.totalMatches) ||
     value.search_mode !== undefined && rows.some(row => row.matchKind !== result.searchMode)) throw new Error(UNEXPECTED)
+  applyReviewMetadata(value,result)
   return result
 }
 
@@ -216,6 +218,7 @@ export function parseIndexInfo(value: unknown): IndexInfo {
   if (new Set(sites.map(row => row.site)).size !== sites.length) throw new Error(UNEXPECTED)
   if (value.semantic_state !== undefined && !["warming", "ready", "unavailable"].includes(value.semantic_state as string)) throw new Error(UNEXPECTED)
   return {
+    ...(value.progressive_search===undefined?{}:{progressiveSearch:mockFlag(value.progressive_search)}),
     records: count(value.searchable_records),
     sites,
     modelName: requiredText(value.model_name),

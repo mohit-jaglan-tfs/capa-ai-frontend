@@ -1,3 +1,4 @@
+import {completeReview} from "./progressive"
 import { ApiError } from "@/shared/api/httpClient"
 import {rowMatchesScope} from "../scopeModel"
 import { matchApi } from "@/shared/api/clients"
@@ -7,15 +8,9 @@ import { canonicalFilters, filterKey, hasFilters, inputKey } from "../searchMode
 
 const BASE = "/api/v1/match"
 export const matchService = {
-  async search(input: SearchInput, signal?: AbortSignal): Promise<SearchResult> {
+  async search(input: SearchInput, signal?: AbortSignal, onInitial?: (result:SearchResult)=>void): Promise<SearchResult> {
     const { query, site, topK, mode, offset } = input
-    const result = parseSearchResponse(await matchApi.requestJson<unknown>(`${BASE}/search`, {
-      method: "POST",
-      body: JSON.stringify({ query, ...(site ? { site } : { all_sites: true }), top_k: topK,
-        ...(hasFilters(input.filters) ? { filters: canonicalFilters(input.filters) } : {}),
-        mode, assist: true, ...(offset ? { offset } : {}) }),
-      signal,
-    }))
+    const validate=(result:SearchResult):SearchResult=>{
     const submitted = result.submittedCriteria
     const effective = result.filters
     const changedSelectedFilters = effective && Object.entries(canonicalFilters(input.filters)).some(([key, value]) => {
@@ -28,6 +23,15 @@ export const matchService = {
     if (result.query !== query || wrongCriteria || changedSelectedFilters || result.filters && result.rows.some(row=>!rowMatchesScope(row,result.filters!)) || site && result.scope !== site || result.rows.length > topK || result.offset !== offset || result.requestedMode !== mode)
       throw new Error("MATCH returned results for a different query or scope. Please retry.")
     return result
+    }
+    const result = parseSearchResponse(await matchApi.requestJson<unknown>(`${BASE}/search`, {
+      method: "POST",
+      body: JSON.stringify({ query, ...(site ? { site } : { all_sites: true }), top_k: topK,
+        ...(hasFilters(input.filters) ? { filters: canonicalFilters(input.filters) } : {}),
+        mode, assist: true, ...(onInitial ? {progressive:true} : {}), ...(offset ? { offset } : {}) }),
+      signal,
+    }))
+    return completeReview(validate(result), signal, onInitial, raw=>validate(parseSearchResponse(raw)))
   },
   async getOverview(result: SearchResult, signal?: AbortSignal): Promise<EvidenceOverview> {
     for (let attempt=0;attempt<2;attempt++) {

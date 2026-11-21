@@ -1,3 +1,4 @@
+import {RelevanceStatus} from "./components/RelevanceStatus"
 import { useState } from "react"
 import { PageHeading } from "@/shared/components"
 import { CandidateDetail } from "./components/CandidateDetail"
@@ -76,9 +77,11 @@ export function MatchScreen() {
           <p className="mt-1 text-[11px] text-suite-muted">{match.result.interpretation.query ? "Your original wording is searched too. " : "Records are shown by opened date, newest first. "}Applied scope and filters are shown with the results.{match.result.interpretation.origin === "local" ? " AI query interpretation is unavailable; local search assistance was used." : ""}</p>
           <div className="mt-2 flex flex-wrap gap-1.5"><span className="rounded-full bg-white px-2 py-1 text-[11px]">Scope: {match.result.scope}</span>{match.result.filters && filterChips(match.result.filters).map(chip=><span key={`${chip.key}:${chip.value}`} className="rounded-full bg-white px-2 py-1 text-[11px]">{chip.label}</span>)}</div>
         </div>}
+        <RelevanceStatus result={match.result} error={match.reviewError}/>
+        {match.selected&&!match.result.rows.some(row=>row.deviationId===match.selectedId)&&<p role="status" className="rounded-lg border border-suite-line bg-suite-info-wash p-3 text-xs leading-5 text-suite-blue">Deviation {match.selectedId} was opened from initial matches and remains available for source review. It was not retained in the final selection.</p>}
         <EvidenceOverview result={match.result} value={overview.value} state={overview.state} onRetry={overview.retry} onSelect={row=>void match.select(row)} />
       </>}
-      {match.searchState === "success" && match.result && (
+      {(match.searchState === "success" || !!match.selected) && match.result && (
         <section className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,.65fr)]">
           <ResultsList
             rows={match.result.rows}
