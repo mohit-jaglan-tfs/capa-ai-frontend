@@ -93,9 +93,9 @@ test("KPI cards align within each row, keep readable values and fit the availabl
   for (const [path, name] of [["/map", "Analysis KPIs"], [`/map/clusters/${value.records[0].clusterId}`, "Cluster KPIs"]]) {
     await page.goto(path)
     const kpis = page.getByRole("region", { name, exact: true })
-    await expect(kpis.locator(":scope > .map-kpi-card")).toHaveCount(4)
+    await expect(kpis.locator(".map-kpi-card")).toHaveCount(name === "Analysis KPIs" ? 5 : 4)
     const bounds = (await kpis.boundingBox())!
-    const cards = await kpis.locator(":scope > .map-kpi-card").evaluateAll(items => items.map(item => {
+    const cards = await kpis.locator(".map-kpi-card").evaluateAll(items => items.map(item => {
       const rect = item.getBoundingClientRect()
       return { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
     }))

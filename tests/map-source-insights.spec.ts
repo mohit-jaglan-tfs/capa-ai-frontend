@@ -38,8 +38,10 @@ async function more(page:Page){await page.getByText(/^More filters \(/).click()}
 test("all insights precede guided investigation, and DR types precede cumulative share",async({page})=>{
   await mock(page);await page.goto("/map")
   const insights=page.getByRole("region",{name:"Deviation insights",exact:true})
-  await expect(insights.getByText("Fictional Client A",{exact:true})).toBeVisible()
-  for(const name of ["Top 3 clients","Top 3 stages","Top 3 products"])await expect(insights.getByText(name,{exact:true})).toBeVisible()
+  await expect(insights.getByRole("list",{name:"Top three stages",exact:true})).toContainText("Packaging")
+  await expect(insights.getByText("Top stages · past 12 months",{exact:true})).toBeVisible()
+  for(const name of ["Top 3 clients","Top 3 products"])await expect(insights.getByText(name,{exact:true})).toHaveCount(0)
+  await expect(insights.getByRole("region",{name:"Analysis KPIs",exact:true}).locator(".map-kpi-card")).toHaveCount(5)
   const top=(await insights.boundingBox())!,guide=(await page.getByText("Guided investigation",{exact:true}).boundingBox())!
   expect(guide.y).toBeGreaterThanOrEqual(top.y+top.height)
   const rows=page.getByRole("list",{name:"Top three DR types",exact:true}),combined=page.getByLabel("DR types combined contribution",{exact:true})
@@ -84,12 +86,12 @@ test("100 percent fits its own column at narrow desktop widths, phone widths and
   }
 })
 
-test("missing client and product metadata is explained without fabricated top entries",async({page})=>{
+test("missing client and product cards are omitted while the stage ranking remains in the KPI layout",async({page})=>{
   await mock(page,true);await page.goto("/map")
   const source=page.getByRole("region",{name:"Past 12 months source rankings",exact:true})
-  await expect(source.getByText("Data unavailable",{exact:true})).toHaveCount(2)
-  await expect(source).toContainText("All recorded client values are blank")
-  await expect(source).toContainText("No structured product field")
+  await expect(page.getByText("Top 3 clients",{exact:true})).toHaveCount(0)
+  await expect(page.getByText("Top 3 products",{exact:true})).toHaveCount(0)
+  await expect(source.getByText("Data unavailable",{exact:true})).toHaveCount(0)
   await expect(source.getByRole("list",{name:"Top three clients",exact:true})).toHaveCount(0)
   await expect(source.getByRole("list",{name:"Top three stages",exact:true})).toContainText("Packaging")
 })
@@ -102,7 +104,7 @@ test("ranking errors can be retried independently of the analysis KPIs",async({p
     await route.fallback()
   })
   await page.goto("/map")
-  await expect(page.getByText("Source rankings could not be loaded",{exact:true})).toBeVisible()
-  await page.getByRole("button",{name:"Retry source rankings",exact:true}).click()
-  await expect(page.getByText("Fictional Client A",{exact:true})).toBeVisible()
+  await expect(page.getByText("Stage ranking could not be loaded",{exact:true})).toBeVisible()
+  await page.getByRole("button",{name:"Retry stage ranking",exact:true}).click()
+  await expect(page.getByRole("list",{name:"Top three stages",exact:true})).toContainText("Packaging")
 })

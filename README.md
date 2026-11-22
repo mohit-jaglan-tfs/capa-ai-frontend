@@ -269,25 +269,26 @@ On-time closure replaces Active clusters. For Minor, Major and Critical, it show
 
 CAPA linkage and CAPA status filters select the deviation cohort through retained parent/root-parent links. The CAPA KPI continues to count all distinct CAPAs linked to that resulting cohort. Due-date status distinguishes closed late, open overdue and on-time records; open overdue uses the current UTC date and the saved source status. Filters and cluster groups remain in links across details/evidence and reload, and Clear all resets them together.
 
-Cluster groups organize the detailed patterns into up to 12 suggested categories. Selecting a group narrows the records and KPIs while retaining the original analysis assignments and outputs. Missing source data is shown explicitly.
+Cluster groups use 11 predefined quality categories plus Other / needs classification. Assignment is suggested from cluster titles and record types. Other stays last in both the group cards and the filter. Selecting a group narrows the records and analysis KPIs while retaining the original analysis assignments and outputs.
 
 
-### Deviation insights layout (21 November 2026)
+### Deviation insights layout (22 November 2026)
 
-The overview places all seven KPI cards in Deviation insights, above Guided
-investigation. On-time percentages scale to their own column width, including
-narrow desktop cards and 125% zoom. DR types appear before their cumulative
-contribution. CAPA linkage, CAPA status and Due-date status are inside More filters;
-active chips remain visible and persisted advanced filters are revealed on reload.
+Five cards sit in Deviation insights above Guided investigation. On-time closure,
+criticality and CAPA implemented / raised form the summary row; Top DR types and
+Top stages form a matching pair of rankings underneath. The layout adapts to the
+available content width and retains readable percentages at 125% zoom. Ranked
+names, counts and shares precede their combined contribution. CAPA linkage, CAPA
+status and Due-date status remain in More filters with visible active chips.
 
-The first four KPIs follow the current analysis filters. The final three rankings
-cover all deviations in the verified source snapshot opened in the past 12 months,
-using the browser's reporting date and displaying exact dates and coverage. They
-are explicitly labelled source-wide and do not follow sample/cluster filters.
-Missing clients or products are shown as unavailable, never inferred from text.
-Stages disclose recorded versus grouped process-step/department coverage. These
-rankings need the matching MAP `/runs/{run_id}/insights` endpoint; failures have an
-independent retry and do not hide the existing analysis KPIs.
+The four analysis KPIs follow the current filters. Top stages covers all distinct
+deviations in the verified source opened in the past 12 months. Its full-source
+denominator and exact dates are visible; its tooltip explains stage mapping,
+missing coverage and independence from the analysis filters and cluster groups.
+Client and product cards are omitted because this source has no usable deviation
+client values or structured product identity. No names are inferred from text.
+The stage card uses MAP `/runs/{run_id}/insights`; loading, no-data and failure
+states stay within that card, with an independent retry.
 
 
 ### MATCH direct answers and historical watchlist (21 November 2026)

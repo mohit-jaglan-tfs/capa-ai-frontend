@@ -92,3 +92,28 @@ test("cluster groups retain source filters and old theme links, and fit a narrow
   expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false)
   expect(await page.getByLabel("On-time closure by criticality").locator("dd").evaluateAll(cells=>cells.every(cell=>cell.scrollWidth<=cell.clientWidth))).toBe(true)
 })
+
+test("Other stays last in group cards and filters, including an empty selected group",async({page})=>{
+  const data=value(),template=structuredClone(data.clusters[0]),record=structuredClone(data.records[0])
+  const names=["Storage and transport","Other / needs classification","Analytical testing"]
+  data.clusters=names.map((parentTheme,index)=>({...structuredClone(template),id:`GROUP-${index}`,parentTheme,capas:[],...(template.analysisContext?{analysisContext:{...template.analysisContext,recordCount:1}}:{})}))
+  data.records=data.clusters.map((cluster:any,index:number)=>({...structuredClone(record),id:`GROUP-D-${index}`,clusterId:cluster.id,criticality:index===1?"Major":"Minor"}))
+  data.analysis.recordCount=3;data.capas=[]
+  await mock(page,data);await page.goto("/map")
+  const groups=page.getByRole("heading",{name:"Cluster groups",exact:true}).locator("..")
+  const cards=groups.locator("div.grid button")
+  await expect(cards).toHaveCount(3)
+  await expect(cards.nth(0)).toContainText("Analytical testing")
+  await expect(cards.nth(1)).toContainText("Storage and transport")
+  await expect(cards.nth(2)).toContainText("Other / needs classification")
+  await page.getByText(/^More filters \(/).click()
+  const filter=page.getByRole("combobox",{name:"Cluster group",exact:true})
+  await expect(filter.locator("option").last()).toHaveText("Other / needs classification")
+  await groups.getByRole("button",{name:/^Storage and transport/}).click()
+  await page.getByRole("combobox",{name:"Criticality",exact:true}).selectOption("Major")
+  await expect(cards).toHaveCount(2)
+  await expect(cards.first()).toContainText("Storage and transport")
+  await expect(cards.first()).toContainText("0 deviations")
+  await expect(cards.last()).toContainText("Other / needs classification")
+  await expect(cards.first()).toHaveAttribute("aria-pressed","true")
+})

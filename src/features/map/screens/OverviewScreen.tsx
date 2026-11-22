@@ -57,11 +57,12 @@ export function OverviewScreen({
       <AnalysisStatus />
       <section aria-labelledby="deviation-insights-heading" className="map-workspace-content mb-5 min-w-0 rounded-2xl border border-suite-line bg-suite-surface/50 p-3 sm:p-5">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <div><h2 id="deviation-insights-heading" className="text-lg font-bold">Deviation insights</h2><p className="mt-1 text-xs leading-5 text-suite-muted">Closure, criticality, DR types and CAPA performance for your current analysis view.</p></div>
+          <div><h2 id="deviation-insights-heading" className="text-lg font-bold">Deviation insights</h2><p className="mt-1 text-xs leading-5 text-suite-muted">Analysis performance for your current view, plus stage trends across the full source.</p></div>
           <span className="rounded-full border border-suite-line bg-white px-3 py-1.5 text-xs font-bold tabular-nums text-suite-slate">{filtered.length.toLocaleString()} analysed deviations · current filters</span>
         </div>
-        <OverviewMetrics records={filtered} capas={capas} sourceAvailable={analysis.sourceAvailable} />
-        <div className="mt-4"><SourceInsights runId={analysis.runId} snapshotId={analysis.resolvedSnapshotId ?? analysis.snapshotId} refreshKey={data.lastChecked} /></div>
+        <OverviewMetrics records={filtered} capas={capas} sourceAvailable={analysis.sourceAvailable}>
+          <SourceInsights runId={analysis.runId} snapshotId={analysis.resolvedSnapshotId ?? analysis.snapshotId} refreshKey={data.lastChecked} />
+        </OverviewMetrics>
       </section>
       <GuidedWorkspace step={1}>
         <FilterPanel

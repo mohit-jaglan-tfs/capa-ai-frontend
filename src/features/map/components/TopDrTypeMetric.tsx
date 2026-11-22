@@ -9,6 +9,7 @@ export function TopDrTypeMetric({ metrics }: { metrics: Metrics }) {
     help={topDrTypes.length ? `Top ${topDrTypes.length} combined · ${topDrCumulativeCount.toLocaleString()} of ${total.toLocaleString()} deviations${unknownDrType ? ` · ${unknownDrType.toLocaleString()} unknown DR type` : ""}` : "No usable DR type in this view"}
     tooltip={mapHelp.topDrType + (drTypeCutoffTied ? " A tie reaches beyond third place; the first three alphabetically are shown." : "")}>
     {topDrTypes.length ? <>
+      <p className="mb-3 text-xs leading-5 text-suite-muted">Current view · <span className="font-bold tabular-nums text-suite-blue">{total.toLocaleString()} {total === 1 ? "deviation" : "deviations"}</span></p>
       <ol aria-label="Top three DR types" className="space-y-2">{topDrTypes.map((type,index)=><li key={type.label} className="flex min-w-0 items-start gap-2 text-xs leading-5">
         <span className="text-suite-muted">{index+1}</span>
         <span className="min-w-0 flex-1 break-words font-bold text-suite-ink">{type.label}</span>

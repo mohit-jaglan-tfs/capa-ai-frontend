@@ -1,5 +1,6 @@
 import { Panel } from "@/shared/components"
 import type { Cluster, DeviationRecord } from "../types"
+import { compareClusterGroups } from "../clusterGroupOrder"
 
 export function ClusterGroups({clusters,records,selected,onChange}: {
   clusters: Cluster[]; records: DeviationRecord[]; selected:string; onChange:(value:string)=>void
@@ -13,11 +14,12 @@ export function ClusterGroups({clusters,records,selected,onChange}: {
       groups.get(name)!.push(record)
     }
   }
-  const names = [...groups.keys()].sort((a,b)=>a.localeCompare(b))
+  const names = [...groups.keys()]
   if (selected !== "All" && !groups.has(selected)) names.push(selected)
+  names.sort(compareClusterGroups)
   if (!names.length) return null
   const ungrouped = records.filter(record=>!byId.get(record.clusterId)).length
-  return <Panel title="Cluster groups" help="Suggested groups organize related detailed clusters. Check their source records; a group does not establish a common root cause or change cluster membership.">
+  return <Panel title="Cluster groups" help="Groups use 11 predefined quality categories plus Other / needs classification. Assignment is suggested from cluster titles and record types. Check their source records; a group does not establish a common root cause or change cluster membership.">
     <div className="mb-3 flex flex-wrap items-center gap-3">
       <button type="button" onClick={()=>onChange("All")} aria-pressed={selected==="All"} className="map-secondary text-xs!">All groups · {records.length.toLocaleString()} deviations</button>
       <span className="text-xs text-suite-muted">Select a group to focus the KPIs and cluster summary.</span>
