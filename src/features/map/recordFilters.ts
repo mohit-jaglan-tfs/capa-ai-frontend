@@ -1,5 +1,6 @@
 import type { DeviationRecord, Filters, MapDataset, MapFilterKey } from "./types"
 import { dueStatusLabels } from "./deadlines"
+import { compareClusterGroups } from "./clusterGroupOrder"
 
 export type MapFilterContext = Pick<MapDataset, "clusters" | "capas" | "analysis">
 export const LINKED_CAPA = "Linked CAPA"
@@ -46,5 +47,6 @@ export function mapFilterOptions(source: DeviationRecord[], key: MapFilterKey, c
   if (key === "dueStatus") return source.some(record => record.dueDate)
     ? [PAST_DUE, "Open overdue", "Closed late", "Closed on time", "Open within due date", "Cancelled", UNKNOWN]
     : [UNKNOWN]
-  return [...new Set(source.flatMap(record => values(record,key,index)))].sort((a,b) => a.localeCompare(b,undefined,{numeric:true}))
+  const options = [...new Set(source.flatMap(record => values(record,key,index)))]
+  return options.sort(key === "clusterGroup" ? compareClusterGroups : (a,b) => a.localeCompare(b,undefined,{numeric:true}))
 }

@@ -63,6 +63,13 @@
     gap: 12px;
     align-items: stretch;
   }
+  .map-overview-summary-grid,
+  .map-overview-rankings-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    align-items: stretch;
+  }
   .map-cluster-table {
     display: none;
   }
@@ -149,6 +156,22 @@
 @container map-workspace (min-width: 560px) {
   .map-kpi-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .map-overview-summary-grid,
+  .map-overview-rankings-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .map-overview-summary-grid > :last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@container map-workspace (min-width: 900px) {
+  .map-overview-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .map-overview-summary-grid > :last-child {
+    grid-column: auto;
   }
 }
 
