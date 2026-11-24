@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { lazy, Suspense, useEffect, useRef, useState } from "react"
 import { canNavigate } from "@/shared/lib/navigation"
 import { LandingScreen } from "@/features/landing/LandingScreen"
 import { MapRoutes } from "@/features/map/MapRoutes"
@@ -6,12 +6,16 @@ import { MatchScreen } from "@/features/match/MatchScreen"
 import { AppShell, NotFoundScreen } from "@/shared/components"
 import { parseRoute, type Route } from "./routes"
 
+const AuthorApp = lazy(() => import("@/features/author/App"))
+
 function renderRoute(route: Route) {
   switch (route.type) {
     case "landing":
       return <LandingScreen />
     case "match":
       return <MatchScreen />
+    case "author":
+      return <Suspense fallback={<p>Loading AUTHOR…</p>}><AuthorApp /></Suspense>
     case "overview":
     case "cluster":
     case "evidence":

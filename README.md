@@ -14,7 +14,7 @@ A deviation is a recorded departure from an expected process. CAPA means correct
 | MAP workspace | http://127.0.0.1:8100/map |
 | MATCH workspace | http://127.0.0.1:8100/match |
 | Current integration | MAP on port 8101; MATCH on port 8102 |
-| AUTHOR screens | Pending frontend integration |
+| AUTHOR workspace | `/author` — prototype with synthetic data |
 
 [Architecture](#how-the-frontend-connects) / [Setup](#run-locally) / [Screens](#what-you-can-do-today) / [Configuration](#configuration) / [Troubleshooting](#troubleshooting) / [Deployment](#deployment)
 
@@ -27,7 +27,7 @@ A deviation is a recorded departure from an expected process. CAPA means correct
 | [MATCH backend](https://github.com/arshad-ali-tfs/capa-ai-match-backend) | Similar-record search API | 8102 |
 | [AUTHOR backend](https://github.com/arshad-ali-tfs/capa-ai-author-backend) | Investigation and CAPA authoring API | 8103 |
 
-The backends are independent services using copies of the same versioned source export. The frontend reads MAP and MATCH over HTTP; it does not read the CSV/database directly or run models. AUTHOR and the other planned-module cards remain placeholders.
+The backends are independent services using copies of the same versioned source export. The frontend reads MAP and MATCH over HTTP; it does not read the CSV/database directly or run models. AUTHOR is an imported prototype using an in-memory mock service and synthetic data; it is not connected to the AUTHOR backend. The other planned-module cards remain placeholders.
 
 ## How the frontend connects
 

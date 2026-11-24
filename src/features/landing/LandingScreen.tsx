@@ -49,8 +49,8 @@ const workspaceCards: WorkspaceCard[] = [
     description:
       "Support investigation, root cause, and resolution planning with evidence-linked drafting that keeps facts, inferences, and unknowns visible.",
     supports: "TrackWise remains the system of record; no write-back.",
-    action: "Draft with evidence • not available",
-    placeholder: true,
+    action: "Open AUTHOR",
+    href: "/author",
   },
   {
     module: "TREND",

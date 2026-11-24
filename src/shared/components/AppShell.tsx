@@ -13,6 +13,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       href: "/match",
       active: currentPath.startsWith("/match"),
     },
+    { label: "AUTHOR", href: "/author", active: currentPath.startsWith("/author") },
   ]
 
   return (
@@ -78,7 +79,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto flex w-full max-w-[1500px] flex-col gap-4 p-4 outline-none sm:p-6"
+        className={cx("mx-auto flex w-full flex-col gap-4 p-4 outline-none sm:p-6", currentPath.startsWith("/author") ? "max-w-none" : "max-w-[1500px]")}
       >
         {children}
       </main>
